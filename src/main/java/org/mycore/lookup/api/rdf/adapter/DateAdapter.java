@@ -25,6 +25,8 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Ren\u00E9 Adler (eagle)
@@ -32,20 +34,21 @@ import java.time.temporal.TemporalAccessor;
  */
 public class DateAdapter extends RDFMappingAdapter<String, TemporalAccessor> {
 
+    private final List<String> DATE_PATTERNS = Arrays.asList("yyyy[[-MM][-dd]]", "[[dd.][MM.]]yyyy", "[[dd.][M.]]yyyy");
+
     /* (non-Javadoc)
      * @see org.mycore.lookup.api.rdf.adapter.RDFMappingAdapter#unmarshal(java.lang.Object)
      */
     @Override
     public TemporalAccessor unmarshal(String v) {
-        TemporalAccessor ta = null;
-        try {
-            ta = DateTimeFormatter.ofPattern("yyyy[[-MM][-dd]]").parseBest(v, LocalDate::from,
-                YearMonth::from, Year::from);
-        } catch (DateTimeParseException e) {
-            ta = DateTimeFormatter.ofPattern("[[dd.][MM.]]yyyy").parseBest(v, LocalDate::from,
-                YearMonth::from, Year::from);
-        }
-        return v != null ? ta : null;
+        return v != null ? DATE_PATTERNS.stream().map(dp -> {
+            try {
+                return DateTimeFormatter.ofPattern(dp).parseBest(v, LocalDate::from,
+                    YearMonth::from, Year::from);
+            } catch (DateTimeParseException e) {
+                return null;
+            }
+        }).filter(s -> s != null).findFirst().orElse(null) : null;
     }
 
     /* (non-Javadoc)

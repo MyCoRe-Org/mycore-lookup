@@ -25,6 +25,8 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -39,20 +41,21 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class DateTemporalAccessorAdapter extends XmlAdapter<String, TemporalAccessor> {
 
+    private final List<String> DATE_PATTERNS = Arrays.asList("yyyy[[-MM][-dd]]", "[[dd.][MM.]]yyyy", "[[dd.][M.]]yyyy");
+
     /* (non-Javadoc)
      * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
      */
     @Override
     public TemporalAccessor unmarshal(String v) throws Exception {
-        TemporalAccessor ta = null;
-        try {
-            ta = DateTimeFormatter.ofPattern("yyyy[[-MM][-dd]]").parseBest(v, LocalDate::from,
-                YearMonth::from, Year::from);
-        } catch (DateTimeParseException e) {
-            ta = DateTimeFormatter.ofPattern("[[dd.][MM.]]yyyy").parseBest(v, LocalDate::from,
-                YearMonth::from, Year::from);
-        }
-        return v != null ? ta : null;
+        return v != null ? DATE_PATTERNS.stream().map(dp -> {
+            try {
+                return DateTimeFormatter.ofPattern(dp).parseBest(v, LocalDate::from,
+                    YearMonth::from, Year::from);
+            } catch (DateTimeParseException e) {
+                return null;
+            }
+        }).filter(s -> s != null).findFirst().orElse(null) : null;
     }
 
     /* (non-Javadoc)
