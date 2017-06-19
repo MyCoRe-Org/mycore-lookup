@@ -23,10 +23,10 @@ package org.mycore.lookup.api.rdf.adapter;
  * @author Ren\u00E9 Adler (eagle)
  *
  */
-public abstract class RDFMappingAdapter<ValueType, BoundType> {
+public abstract class RDFMappingAdapter<V, R> {
 
-    public abstract BoundType unmarshal(ValueType v);
+    public abstract R unmarshal(V v);
 
-    public abstract ValueType marshal(BoundType v);
+    public abstract V marshal(R v);
 
 }
