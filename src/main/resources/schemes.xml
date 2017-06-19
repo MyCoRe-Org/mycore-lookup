@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemes>
+  <scheme id="BAV">
+    <name>Vatican Library</name>
+  </scheme>
+  <scheme id="BNE">
+    <name>Biblioteca Nacional de España</name>
+  </scheme>
+  <scheme id="BNF" authorityURI="http://catalogue.bnf.fr/ark:/12148/cb{$id}">
+    <name>Bibliothèque nationale de France</name>
+  </scheme>
+  <scheme id="DNB" authorityURI="http://d-nb.info/gnd/{$id}">
+    <alias>gnd</alias>
+    <name>Gemeinsame Normdatei</name>
+    <rdf uri="http://d-nb.info/gnd/{$id}/about/lds" type="TTL" />
+  </scheme>
+  <scheme id="EGAXA">
+    <name>Bibliotheca Alexandrina</name>
+  </scheme>
+  <scheme id="ICCU">
+    <name>Italian National Catalog</name>
+  </scheme>
+  <scheme id="JPG" authorityURI="http://vocab.getty.edu/ulan/{$id}">
+    <name>Getty ULAN</name>
+  </scheme>
+  <scheme id="JPGRI">
+    <name>Getty Research Institute</name>
+  </scheme>
+  <scheme id="LAC">
+    <name>Library and Archives Canada</name>
+  </scheme>
+  <scheme id="LC" authorityURI="http://id.loc.gov/authorities/names/{$id}">
+    <alias>loc</alias>
+    <name>Library of Congress Authorities</name>
+  </scheme>
+  <scheme id="NKC">
+    <name>National Library of the Czech Republic</name>
+  </scheme>
+  <scheme id="NLA">
+    <name>National Library of Australia</name>
+  </scheme>
+  <scheme id="NLI">
+    <name>National Library of Israel</name>
+  </scheme>
+  <scheme id="NLIara">
+    <name>National Library of Israel</name>
+  </scheme>
+  <scheme id="NLIcyr">
+    <name>National Library of Israel</name>
+  </scheme>
+  <scheme id="NLIheb">
+    <name>National Library of Israel</name>
+  </scheme>
+  <scheme id="NLIlat">
+    <name>National Library of Israel</name>
+  </scheme>
+  <scheme id="NSZL">
+    <name>National Széchényi Library (Hungary)</name>
+  </scheme>
+  <scheme id="NUKAT">
+    <name>NUKAT, Poland</name>
+  </scheme>
+  <scheme id="PTBNP">
+    <name>Biblioteca Nacional de Portugal</name>
+  </scheme>
+  <scheme id="RERO">
+    <name>RERO (Switzerland)</name>
+  </scheme>
+  <scheme id="SELIBR" authoriryURI="http://libris.kb.se/auth/{$id}">
+    <name>National Library of Sweden</name>
+  </scheme>
+  <scheme id="SWNL">
+    <name>Swiss National Library</name>
+  </scheme>
+  <scheme id="VIAF" authorityURI="http://viaf.org/viaf/{$id}">
+    <alias>viafid</alias>
+    <name>Virtual International Authority File</name>
+    <rdf uri="http://viaf.org/viaf/{$id}/rdf.xml" type="RDF/XML" />
+  </scheme>
+</schemes>
