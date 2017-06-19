@@ -20,12 +20,14 @@
 package org.mycore.lookup;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.lucene.index.Term;
@@ -48,7 +50,7 @@ import org.mycore.lookup.common.config.Configuration;
  * @author Ren\u00E9 Adler (eagle)
  *
  */
-public class TestIndexAnnotation {
+public class TestIndexManager {
 
     private IndexManager IDX_MGR;
 
@@ -64,14 +66,12 @@ public class TestIndexAnnotation {
     }
 
     @Test
-    public void test() throws IOException, ParseException {
+    public void testAdd() throws IOException, ParseException {
         Person p = buildPerson();
         p.setPlaceOfBirth(buildPlace());
         p.setPlaceOfActivity(Arrays.asList(buildPlace()));
         IDX_MGR.set(p);
 
-        //        Query q = new QueryParser("alternateNames", IDX_MGR.getAnalyzer()).parse("tester");
-        //        Query q = new QueryParser("mappedIds", IDX_MGR.getAnalyzer()).parse("DNB:1054880980");
         Query q = new TermQuery(new Term("Person.mappedIds", "DNB:1234567890"));
 
         List<Person> hits = IDX_MGR.get(q);
@@ -79,6 +79,25 @@ public class TestIndexAnnotation {
 
         assertEquals(1, hits.size());
         assertTrue(IDX_MGR.exists(p));
+    }
+
+    @Test
+    public void testUpdate() throws IOException, ParseException {
+        Person p = buildPerson();
+        p.setPlaceOfBirth(buildPlace());
+        p.setPlaceOfActivity(Arrays.asList(buildPlace()));
+        IDX_MGR.set(p);
+
+        p.setDescription("Updated Person Object.");
+        IDX_MGR.set(p);
+
+        Query q = new TermQuery(new Term("Person.mappedIds", "DNB:1234567890"));
+
+        Person p2 = (Person) Optional.ofNullable(IDX_MGR.get(q, 1)).map(l -> l.stream().findFirst().orElse(null))
+            .orElse(null);
+
+        assertNotNull(p2);
+        assertEquals("Updated Person Object.", p2.getDescription());
     }
 
     private Person buildPerson() {
