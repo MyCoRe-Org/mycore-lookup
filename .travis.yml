@@ -1,5 +1,7 @@
 language: java
+dist: trusty
 jdk:
   - oraclejdk8
+  - openjdk8
 after_script:
   - mvn com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml -DprojectToken=${CODACY_PROJECT_TOKEN} -DapiToken=${CODACY_API_TOKEN}
