@@ -50,8 +50,6 @@ import org.mycore.lookup.common.config.Configuration;
  */
 public class TestIndexAnnotation {
 
-    private Configuration CONFIG;
-
     private IndexManager IDX_MGR;
 
     @Rule
@@ -59,8 +57,8 @@ public class TestIndexAnnotation {
 
     @Before
     public void setUp() throws IOException {
-        CONFIG = Configuration.instance();
-        CONFIG.set("Index.Path", tmpFolder.newFolder("index").getAbsolutePath());
+        Configuration config = Configuration.instance();
+        config.set("Index.Path", tmpFolder.newFolder("index").getAbsolutePath());
 
         IDX_MGR = IndexManager.instance();
     }
