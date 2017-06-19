@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.StopwordAnalyzerBase;
-import org.apache.lucene.analysis.de.GermanAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.document.Field.Store;
@@ -102,7 +102,7 @@ public class IndexManager {
     }
 
     private IndexManager() {
-        analyzer = CONFIG.getInstanceOf("Index.Analyzer", new GermanAnalyzer());
+        analyzer = CONFIG.getInstanceOf("Index.Analyzer", new StandardAnalyzer());
         try {
             String indexPath = CONFIG.getString("Index.Path",
                 ConfigurationDir.getConfigurationDirectory().getAbsolutePath() + File.separator + "data"
