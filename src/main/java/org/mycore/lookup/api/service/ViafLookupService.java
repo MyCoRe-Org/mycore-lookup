@@ -65,18 +65,18 @@ public class ViafLookupService extends LookupService {
     private static final Pattern DISPLAY_FORM_PATTERN = Pattern
         .compile("([^,]+),\\s?([^,]+(?=,)|[a-z-A-Z\\W\\-]+(?!,))(?:,\\s|\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
 
-    public ViafLookupService() {
-        super();
-        this.supportedSchemes.add(Scheme.get("viaf"));
-    }
-
     private Function<String, WebTarget> buildTarget = (method) -> {
         ClientConfig config = new ClientConfig();
         config.register(MoxyJsonFeature.class);
         config.register(GenericExceptionMapper.class);
-
+    
         return ClientBuilder.newClient(config).target(REMOTE_URL).path(REMOTE_PATH + "/" + method);
     };
+
+    public ViafLookupService() {
+        super();
+        this.supportedSchemes.add(Scheme.get("viaf"));
+    }
 
     /* (non-Javadoc)
      * @see org.mycore.lookup.api.service.LookupService#suggestCorporate(java.lang.String)

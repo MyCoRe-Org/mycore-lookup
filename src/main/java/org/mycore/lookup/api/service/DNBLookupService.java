@@ -67,18 +67,18 @@ public class DNBLookupService extends LookupService {
 
     private static final String TYPE_PLACE = "PlaceOrGeographicName";
 
-    public DNBLookupService() {
-        super();
-        this.supportedSchemes.add(Scheme.get("gnd"));
-    }
-
     private Function<String, WebTarget> buildTarget = (method) -> {
         ClientConfig config = new ClientConfig();
         config.register(JsonProcessingFeature.class);
         config.register(GenericExceptionMapper.class);
-
+    
         return ClientBuilder.newClient(config).target(REMOTE_URL).path("/" + method);
     };
+
+    public DNBLookupService() {
+        super();
+        this.supportedSchemes.add(Scheme.get("gnd"));
+    }
 
     /* (non-Javadoc)
      * @see org.mycore.lookup.api.service.LookupService#suggestCorporate(java.lang.String)
