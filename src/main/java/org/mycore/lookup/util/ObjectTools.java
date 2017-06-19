@@ -100,13 +100,13 @@ public class ObjectTools {
             return false;
         if (method.getParameterTypes().length != 0)
             return false;
-        return method.getReturnType().equals(Void.TYPE);
+        return !method.getReturnType().equals(Void.TYPE);
     }
 
     public static boolean isSetter(Method method) {
         if (!Arrays.stream(SETTER_PREFIX).anyMatch(method.getName()::startsWith))
             return false;
-        return method.getParameterTypes().length != 1;
+        return method.getParameterTypes().length > 0;
     }
 
     public static <T> byte[] serializeObject(T dataObj) throws IOException {
