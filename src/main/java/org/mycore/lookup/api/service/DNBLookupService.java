@@ -51,7 +51,7 @@ import org.mycore.lookup.frontend.provider.GenericExceptionMapper;
  *
  */
 @Service(type = LookupService.class)
-@Priority(100)
+@Priority(10)
 public class DNBLookupService extends LookupService {
 
     private static final String REMOTE_URL = "http://ws.gbv.de";
