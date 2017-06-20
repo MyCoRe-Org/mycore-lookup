@@ -49,7 +49,7 @@ import org.mycore.lookup.util.ObjectTools;
  * @author Ren\u00E9 Adler (eagle)
  *
  */
-public class RDFMapper<T> {
+public class RDFMapper {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
