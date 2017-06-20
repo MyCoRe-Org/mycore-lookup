@@ -74,7 +74,7 @@ public class XmlMessageBodyReader<T> implements MessageBodyReader<T> {
 			final Unmarshaller unmarshaller = jc.createUnmarshaller();
 			return (T) unmarshaller.unmarshal(entityStream);
 		} catch (JAXBException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new UnsupportedOperationException(e.getMessage(), e);
 		}
 	}
 

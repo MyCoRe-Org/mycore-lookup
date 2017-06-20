@@ -114,7 +114,7 @@ public class EntityFactory<T> {
         try {
             marshaller = marshallerCaller.call();
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't build marshaller.", e);
+            throw new UnsupportedOperationException("Couldn't build marshaller.", e);
         }
 
         Class<? extends Marshaller> marshallerClass = marshaller.getClass();
@@ -128,7 +128,7 @@ public class EntityFactory<T> {
         try {
             method.invoke(marshaller, entity, output);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RuntimeException(
+            throw new UnsupportedOperationException(
                 "Couldn't marshal " + entityType + " to output " + outputType + ".", e);
         }
     };
@@ -152,7 +152,7 @@ public class EntityFactory<T> {
         try {
             return entityType.cast(method.invoke(unmarshaller, input));
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RuntimeException(
+            throw new UnsupportedOperationException(
                 "Couldn't unmarshal " + inputType + " to " + entityType + ".", e);
         }
     };

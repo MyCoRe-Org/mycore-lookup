@@ -119,7 +119,7 @@ public class AutoExecutableHandler {
                             m.invoke(autoExecutable.newInstance());
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new UnsupportedOperationException(e);
                     }
                 });
         } catch (RuntimeException e) {

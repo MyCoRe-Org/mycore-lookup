@@ -71,7 +71,7 @@ public class EventManager {
                 d.handleEvent(event);
             } catch (Exception ex) {
                 LogManager.getLogger(d.getClass()).error(ex.getMessage(), ex);
-                throw new RuntimeException(ex);
+                throw new UnsupportedOperationException(ex);
             }
         });
     }

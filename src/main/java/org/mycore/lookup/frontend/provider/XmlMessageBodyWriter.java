@@ -90,7 +90,7 @@ public class XmlMessageBodyWriter<T> implements MessageBodyWriter<T> {
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			marshaller.marshal(t, entityStream);
 		} catch (JAXBException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new UnsupportedOperationException(e.getMessage(), e);
 		}
 	}
 
