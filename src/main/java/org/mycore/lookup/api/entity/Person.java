@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.mycore.lookup.api.entity.adapter.DateTemporalAccessorAdapter;
 import org.mycore.lookup.api.entity.adapter.DateTemporalAccessorFieldAdapter;
 import org.mycore.lookup.api.entity.adapter.GenderFieldAdapter;
+import org.mycore.lookup.api.rdf.adapter.AlternateNameAdapter;
 import org.mycore.lookup.api.rdf.adapter.DateAdapter;
 import org.mycore.lookup.api.rdf.adapter.GenderAdapter;
 import org.mycore.lookup.api.rdf.adapter.Name2FamilyNameAdapter;
@@ -257,8 +258,8 @@ public class Person extends MappedIdentifiers<Person> {
     @Field(analyze = true, store = true)
     @XmlElement(name = "alternateName")
     @RDFMappings({
-        @RDFMapping(uri = "http://schema.org/alternateName"),
-        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#variantNameForThePerson")
+        @RDFMapping(uri = "http://schema.org/alternateName", adapter = AlternateNameAdapter.class),
+        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#variantNameForThePerson", adapter = AlternateNameAdapter.class)
     })
     public List<String> getAlternateNames() {
         return alternateNames;
@@ -288,11 +289,11 @@ public class Person extends MappedIdentifiers<Person> {
             .collect(Collectors.toList()));
 
         boolean addName = Stream
-            .concat(Arrays.stream(new String[] { this.getGivenName() + " " + this.getFamilyName() }),
+            .concat(Arrays.stream(new String[] { this.getFamilyName() + ", " + this.getGivenName() }),
                 Arrays.stream(new ArrayList<>(
                     Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList())).stream()
                         .toArray(String[]::new)))
-            .noneMatch(a -> a.equalsIgnoreCase(person.getGivenName() + " " + person.getFamilyName()));
+            .noneMatch(a -> a.equalsIgnoreCase(person.getFamilyName() + ", " + person.getGivenName()));
 
         if (addName) {
             List<String> ans = new ArrayList<>(

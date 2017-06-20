@@ -22,30 +22,28 @@ package org.mycore.lookup.api.rdf.adapter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.mycore.lookup.api.entity.Person.AlternateName;
-
 /**
  * @author Ren\u00E9 Adler (eagle)
  *
  */
-public class AlternateNameAdapter extends RDFMappingAdapter<List<String>, List<AlternateName>> {
+public class AlternateNameAdapter extends RDFMappingAdapter<List<String>, List<String>> {
 
     /* (non-Javadoc)
      * @see org.mycore.lookup.api.rdf.adapter.RDFMappingAdapter#unmarshal(java.lang.Object)
      */
     @Override
-    public List<AlternateName> unmarshal(List<String> v) {
+    public List<String> unmarshal(List<String> v) {
         return v.stream().map(s -> {
             try {
                 if (s.contains(",")) {
-                    return new AlternateName(s.substring(0, s.lastIndexOf(",")).trim(),
-                        s.substring(s.lastIndexOf(",") + 1).trim());
+                    return s.substring(0, s.lastIndexOf(",")).trim() + ", "
+                        + s.substring(s.lastIndexOf(",") + 1).trim();
                 }
 
-                return new AlternateName(s.substring(s.lastIndexOf(" ") + 1).trim(),
-                    s.substring(0, s.lastIndexOf(" ")).trim());
+                return s.substring(s.lastIndexOf(" ") + 1).trim() + ", "
+                    + s.substring(0, s.lastIndexOf(" ")).trim();
             } catch (StringIndexOutOfBoundsException e) {
-                return null;
+                return s;
             }
         }).filter(e -> e != null).collect(Collectors.toList());
     }
@@ -54,8 +52,8 @@ public class AlternateNameAdapter extends RDFMappingAdapter<List<String>, List<A
      * @see org.mycore.lookup.api.rdf.adapter.RDFMappingAdapter#marshal(java.lang.Object)
      */
     @Override
-    public List<String> marshal(List<AlternateName> v) {
-        return v.stream().map(an -> an.getFamilyName() + ", " + an.getGivenName()).collect(Collectors.toList());
+    public List<String> marshal(List<String> v) {
+        return v;
     }
 
 }
