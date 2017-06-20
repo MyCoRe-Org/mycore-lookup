@@ -1,0 +1,2 @@
+# mycore-lookup
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fda967e9b9db4a109dcf77ce081fd9ab)](https://www.codacy.com/app/MyCoRe/mycore-lookup?utm_source=github.com&utm_medium=referral&utm_content=MyCoRe-Org/mycore-lookup&utm_campaign=badger)
