@@ -386,15 +386,12 @@ public class IndexManager {
                 try {
                     return searcher.doc(h.doc);
                 } catch (IOException e) {
-                    LOGGER.warn(e.getMessage(), e);
                     return null;
                 }
             }).filter(o -> o != null).collect(Collectors.toList());
         } catch (IOException e) {
-            LOGGER.warn(e.getMessage(), e);
+            return Collections.emptyList();
         }
-
-        return Collections.emptyList();
     }
 
     @SuppressWarnings("unchecked")
