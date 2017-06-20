@@ -20,6 +20,8 @@
 package org.mycore.lookup.api.rdf.adapter;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -28,12 +30,23 @@ import java.util.stream.Collectors;
  */
 public class AlternateNameAdapter extends RDFMappingAdapter<List<String>, List<String>> {
 
+    private static final Pattern PATTERN_DISPLAY_FORM = Pattern
+        .compile("([^,]+),\\s?([^,]+(?=,)|[a-z-A-Z\\s\\d\\.\\-]+(?!,))(?:,\\s|\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
+
+    public static String parse(String name) {
+        Matcher m = PATTERN_DISPLAY_FORM.matcher(name);
+        if (m.find()) {
+            return m.group(1).trim() + ", " + m.group(2).trim();
+        }
+        return name;
+    }
+
     /* (non-Javadoc)
      * @see org.mycore.lookup.api.rdf.adapter.RDFMappingAdapter#unmarshal(java.lang.Object)
      */
     @Override
     public List<String> unmarshal(List<String> v) {
-        return v.stream().map(s -> {
+        return v.stream().map(AlternateNameAdapter::parse).map(s -> {
             try {
                 if (s.contains(",")) {
                     return s.substring(0, s.lastIndexOf(",")).trim() + ", "

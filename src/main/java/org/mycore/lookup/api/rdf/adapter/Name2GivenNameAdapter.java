@@ -30,12 +30,13 @@ public class Name2GivenNameAdapter extends RDFMappingAdapter<String, String> {
      */
     @Override
     public String unmarshal(String v) {
+        String name = AlternateNameAdapter.parse(v);
         try {
-            if (v.contains(",")) {
-                return v.substring(v.lastIndexOf(",") + 1).trim();
+            if (name.contains(",")) {
+                return name.substring(name.lastIndexOf(",") + 1).trim();
             }
 
-            return v.substring(0, v.lastIndexOf(" ")).trim();
+            return name.substring(0, name.lastIndexOf(" ")).trim();
         } catch (StringIndexOutOfBoundsException e) {
             return null;
         }
