@@ -138,7 +138,7 @@ public class EntityFactory<T> {
         try {
             unmarshaller = unmarshallerCaller.call();
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't build unmarshaller.", e);
+            throw new UnsupportedOperationException("Couldn't build unmarshaller.", e);
         }
 
         Class<? extends Unmarshaller> unmarshallerClass = unmarshaller.getClass();
