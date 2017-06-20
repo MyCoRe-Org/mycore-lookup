@@ -17,7 +17,7 @@
  * If not, write to the Free Software Foundation Inc.,
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307 USA
  */
-package org.mycore.lookup;
+package org.mycore.lookup.backend.index;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
