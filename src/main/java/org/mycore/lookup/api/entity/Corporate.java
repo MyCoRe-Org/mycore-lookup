@@ -214,6 +214,11 @@ public class Corporate extends MappedIdentifiers<Corporate> {
         this.setParent(Optional.ofNullable(this.getParent()).orElse(corporate.getParent()));
         this.setPlace(Optional.ofNullable(this.getPlace()).orElse(corporate.getPlace()));
 
+        List<String> ans = new ArrayList<>(
+            Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList()));
+        ans.addAll(Optional.ofNullable(corporate.getAlternateNames()).orElse(Collections.emptyList()).stream()
+            .filter(a -> !ans.contains(a)).distinct().collect(Collectors.toList()));
+
         boolean addName = Stream
             .concat(Arrays.stream(new String[] { this.getName() }),
                 Arrays.stream(new ArrayList<>(
@@ -222,13 +227,10 @@ public class Corporate extends MappedIdentifiers<Corporate> {
             .noneMatch(a -> a.equalsIgnoreCase(corporate.getName()));
 
         if (addName) {
-            List<String> ans = new ArrayList<>(
-                Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList()));
             ans.add(corporate.getName());
-            ans.addAll(Optional.ofNullable(corporate.getAlternateNames()).orElse(Collections.emptyList()).stream()
-                .filter(a -> !ans.contains(a)).collect(Collectors.toList()));
-            this.setAlternateNames(ans);
         }
+
+        this.setAlternateNames(ans);
     }
 
     /* (non-Javadoc)

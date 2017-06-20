@@ -125,6 +125,11 @@ public class Place extends MappedIdentifiers<Place> {
         this.setDescription(Optional.ofNullable(this.getDescription()).orElse(place.getDescription()));
         this.setHomepage(Optional.ofNullable(this.getHomepage()).orElse(place.getHomepage()));
 
+        List<String> ans = new ArrayList<>(
+            Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList()));
+        ans.addAll(Optional.ofNullable(place.getAlternateNames()).orElse(Collections.emptyList()).stream()
+            .filter(a -> !ans.contains(a)).distinct().collect(Collectors.toList()));
+
         boolean addName = Stream
             .concat(Arrays.stream(new String[] { this.getName() }),
                 Arrays.stream(new ArrayList<>(
@@ -133,13 +138,10 @@ public class Place extends MappedIdentifiers<Place> {
             .noneMatch(a -> a.equalsIgnoreCase(place.getName()));
 
         if (addName) {
-            List<String> ans = new ArrayList<>(
-                Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList()));
             ans.add(place.getName());
-            ans.addAll(Optional.ofNullable(place.getAlternateNames()).orElse(Collections.emptyList()).stream()
-                .filter(a -> !ans.contains(a)).collect(Collectors.toList()));
-            this.setAlternateNames(ans);
         }
+
+        this.setAlternateNames(ans);
     }
 
     /* (non-Javadoc)
