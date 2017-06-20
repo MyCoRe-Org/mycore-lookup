@@ -21,6 +21,7 @@ package org.mycore.lookup.backend.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -114,7 +115,7 @@ public class IndexManager {
             index = FSDirectory.open(path);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
-            throw (RuntimeException) e.getCause();
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -168,7 +169,7 @@ public class IndexManager {
             try {
                 saveOrUpdate(w, o);
             } catch (IOException e) {
-                throw (RuntimeException) e.getCause();
+                throw new UncheckedIOException(e);
             }
         });
 
@@ -184,7 +185,7 @@ public class IndexManager {
             try {
                 saveOrUpdate(w, obj);
             } catch (IOException e) {
-                throw (RuntimeException) e.getCause();
+                throw new UncheckedIOException(e);
             }
         });
 
