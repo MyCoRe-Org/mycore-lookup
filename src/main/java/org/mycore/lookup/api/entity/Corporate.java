@@ -231,7 +231,7 @@ public class Corporate extends MappedIdentifiers<Corporate> {
         }
 
         if (!ans.isEmpty()) {
-            this.setAlternateNames(ans);
+            this.setAlternateNames(ans.stream().distinct().collect(Collectors.toList()));
         }
     }
 

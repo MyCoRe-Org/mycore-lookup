@@ -310,7 +310,7 @@ public class Person extends MappedIdentifiers<Person> {
         }
 
         if (!ans.isEmpty()) {
-            this.setAlternateNames(ans);
+            this.setAlternateNames(ans.stream().distinct().collect(Collectors.toList()));
         }
     }
 
