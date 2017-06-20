@@ -98,7 +98,7 @@ public abstract class LookupService {
                             LOGGER.warn(e.getMessage(), e);
                             return Collections.<V> emptyList();
                         }
-                        throw new RuntimeException(e.getCause());
+                        throw (RuntimeException) e.getCause();
                     }
                 })).entrySet().stream()
                 .sorted((ls1, ls2) -> {
@@ -142,7 +142,7 @@ public abstract class LookupService {
                         LOGGER.warn(e.getMessage(), e);
                         return Optional.<V> empty();
                     }
-                    throw new RuntimeException(e.getCause());
+                    throw (RuntimeException) e.getCause();
                 }
             })).entrySet().stream()
             .sorted((ls1, ls2) -> {
