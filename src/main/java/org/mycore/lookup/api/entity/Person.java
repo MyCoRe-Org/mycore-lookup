@@ -123,6 +123,7 @@ public class Person extends MappedIdentifiers<Person> {
     @RDFMappings({
         @RDFMapping(uri = "http://schema.org/name", adapter = Name2FamilyNameAdapter.class),
         @RDFMapping(uri = "http://schema.org/familyName"),
+        @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#prefLabel", adapter = Name2FamilyNameAdapter.class),
         @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson", adapter = Name2FamilyNameAdapter.class),
         @RDFMapping(nodeUri = "http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson", uri = "http://d-nb.info/standards/elementset/gnd#surname")
     })
@@ -145,6 +146,7 @@ public class Person extends MappedIdentifiers<Person> {
     @RDFMappings({
         @RDFMapping(uri = "http://schema.org/name", adapter = Name2GivenNameAdapter.class),
         @RDFMapping(uri = "http://schema.org/givenName"),
+        @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#prefLabel", adapter = Name2GivenNameAdapter.class),
         @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson", adapter = Name2GivenNameAdapter.class),
         @RDFMapping(nodeUri = "http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson", uri = "http://d-nb.info/standards/elementset/gnd#forename")
     })
@@ -259,6 +261,7 @@ public class Person extends MappedIdentifiers<Person> {
     @XmlElement(name = "alternateName")
     @RDFMappings({
         @RDFMapping(uri = "http://schema.org/alternateName", adapter = AlternateNameAdapter.class),
+        @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#altLabel", adapter = AlternateNameAdapter.class),
         @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#variantNameForThePerson", adapter = AlternateNameAdapter.class)
     })
     public List<String> getAlternateNames() {
@@ -288,21 +291,25 @@ public class Person extends MappedIdentifiers<Person> {
         this.getMappedIds().addAll(person.getMappedIds().stream().filter(id -> !this.getMappedIds().contains(id))
             .collect(Collectors.toList()));
 
+        List<String> ans = new ArrayList<>(
+            Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList()));
+        ans.addAll(Optional.ofNullable(person.getAlternateNames()).orElse(Collections.emptyList()).stream()
+            .filter(a -> !ans.contains(a)).distinct().collect(Collectors.toList()));
+
         boolean addName = Stream
-            .concat(Arrays.stream(new String[] { this.getFamilyName() + ", " + this.getGivenName() }),
+            .concat(this.getFamilyName() != null && this.getGivenName() != null
+                ? Arrays.stream(new String[] { this.getFamilyName() + ", " + this.getGivenName() }) : Stream.empty(),
                 Arrays.stream(new ArrayList<>(
                     Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList())).stream()
                         .toArray(String[]::new)))
-            .noneMatch(a -> a.equalsIgnoreCase(person.getFamilyName() + ", " + person.getGivenName()));
+            .noneMatch(a -> person.getFamilyName() != null && person.getGivenName() != null
+                ? a.equalsIgnoreCase(person.getFamilyName() + ", " + person.getGivenName()) : false);
 
         if (addName) {
-            List<String> ans = new ArrayList<>(
-                Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList()));
-            ans.add(person.getGivenName() + " " + person.getFamilyName());
-            ans.addAll(Optional.ofNullable(person.getAlternateNames()).orElse(Collections.emptyList()).stream()
-                .filter(a -> !ans.contains(a)).collect(Collectors.toList()));
-            this.setAlternateNames(ans);
+            ans.add(person.getFamilyName() + ", " + person.getGivenName());
         }
+
+        this.setAlternateNames(ans);
     }
 
     /* (non-Javadoc)
