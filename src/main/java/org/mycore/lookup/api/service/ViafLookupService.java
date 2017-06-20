@@ -69,7 +69,7 @@ public class ViafLookupService extends LookupService {
         ClientConfig config = new ClientConfig();
         config.register(MoxyJsonFeature.class);
         config.register(GenericExceptionMapper.class);
-    
+
         return ClientBuilder.newClient(config).target(REMOTE_URL).path(REMOTE_PATH + "/" + method);
     };
 
@@ -89,8 +89,10 @@ public class ViafLookupService extends LookupService {
         if (response.getStatus() == 200) {
             ViafSuggest res = response.readEntity(ViafSuggest.class);
 
-            return res.result.stream().filter(r -> ViafRecord.NameType.corporate.equals(r.nametype))
-                .map(r -> mapRecordToCorporate(r)).collect(Collectors.toList());
+            return Optional.ofNullable(res.result)
+                .map(result -> result.stream().filter(r -> ViafRecord.NameType.corporate.equals(r.nametype))
+                    .map(r -> mapRecordToCorporate(r)).collect(Collectors.toList()))
+                .orElse(null);
         }
 
         return null;
@@ -107,8 +109,10 @@ public class ViafLookupService extends LookupService {
         if (response.getStatus() == 200) {
             ViafSuggest res = response.readEntity(ViafSuggest.class);
 
-            return res.result.stream().filter(r -> ViafRecord.NameType.personal.equals(r.nametype))
-                .map(r -> mapRecordToPerson(r)).collect(Collectors.toList());
+            return Optional.ofNullable(res.result)
+                .map(result -> result.stream().filter(r -> ViafRecord.NameType.personal.equals(r.nametype))
+                    .map(r -> mapRecordToPerson(r)).collect(Collectors.toList()))
+                .orElse(null);
         }
 
         return null;
