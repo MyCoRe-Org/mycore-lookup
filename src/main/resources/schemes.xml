@@ -32,6 +32,7 @@
   <scheme id="LC" authorityURI="http://id.loc.gov/authorities/names/{$id}">
     <alias>loc</alias>
     <name>Library of Congress Authorities</name>
+    <rdf uri="http://id.loc.gov/authorities/names/{$id}.rdf" type="RDF/XML" />
   </scheme>
   <scheme id="NKC">
     <name>National Library of the Czech Republic</name>
