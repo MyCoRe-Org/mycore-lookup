@@ -141,7 +141,9 @@ public class Place extends MappedIdentifiers<Place> {
             ans.add(place.getName());
         }
 
-        this.setAlternateNames(ans);
+        if (!ans.isEmpty()) {
+            this.setAlternateNames(ans);
+        }
     }
 
     /* (non-Javadoc)

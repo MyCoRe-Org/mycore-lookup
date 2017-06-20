@@ -309,7 +309,9 @@ public class Person extends MappedIdentifiers<Person> {
             ans.add(person.getFamilyName() + ", " + person.getGivenName());
         }
 
-        this.setAlternateNames(ans);
+        if (!ans.isEmpty()) {
+            this.setAlternateNames(ans);
+        }
     }
 
     /* (non-Javadoc)
