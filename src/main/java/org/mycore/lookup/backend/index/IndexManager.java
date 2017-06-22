@@ -138,7 +138,7 @@ public class IndexManager {
     /**
      * @return the index
      */
-    public Directory getIndex() {
+    public Directory getIndexDir() {
         return index;
     }
 
