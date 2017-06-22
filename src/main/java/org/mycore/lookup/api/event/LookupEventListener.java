@@ -21,8 +21,11 @@ package org.mycore.lookup.api.event;
 
 import java.util.Optional;
 
-import org.mycore.lookup.backend.index.IndexManager;
+import org.mycore.lookup.api.entity.MappedIdentifiers;
+import org.mycore.lookup.api.service.LookupService;
+import org.mycore.lookup.api.service.LookupService.Type;
 import org.mycore.lookup.common.event.Event;
+import org.mycore.lookup.common.event.EventManager;
 import org.mycore.lookup.common.event.Listener;
 import org.mycore.lookup.common.event.annotation.EventListener;
 
@@ -31,24 +34,40 @@ import org.mycore.lookup.common.event.annotation.EventListener;
  *
  */
 @EventListener
-public class IndexEventListener implements Listener {
+public class LookupEventListener implements Listener {
 
-    public static final String EVENT_INDEX = "index";
+    public static final String EVENT_MAPIDS = "mapIds";
 
-    private final IndexManager idx;
-
-    public IndexEventListener() {
-        idx = IndexManager.instance();
-    }
+    public static final String EVENT_LOOKUP = "lookup";
 
     /* (non-Javadoc)
      * @see org.mycore.lookup.common.event.Listener#handleEvent(org.mycore.lookup.common.event.Event)
      */
     @Override
     public <T> void handleEvent(Event<T> event) throws Exception {
-        if (event != null && EVENT_INDEX.equals(event.getType())) {
-            Optional.ofNullable(event.getObject()).ifPresent(idx::set);
+        if (event != null) {
+            if (EVENT_LOOKUP.equals(event.getType())) {
+                handleLookup(event.getObject());
+            } else if (EVENT_MAPIDS.equals(event.getType())) {
+                handleMapIds(event.getObject());
+            }
         }
+    }
+
+    private <T> void handleLookup(T obj) {
+        Optional.ofNullable(obj)
+            .ifPresent(o -> EventManager.instance().fireEvent(new Event<T>(IndexEventListener.EVENT_INDEX, o)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void handleMapIds(T obj) {
+        Optional.ofNullable(obj).ifPresent(o -> {
+            if (MappedIdentifiers.class.isAssignableFrom(o.getClass())) {
+                MappedIdentifiers<T> mi = (MappedIdentifiers<T>) o;
+                mi.getMappedIds().parallelStream()
+                    .forEach(idType -> LookupService.lookup(Type.fromValue(obj.getClass()), idType));
+            }
+        });
     }
 
 }

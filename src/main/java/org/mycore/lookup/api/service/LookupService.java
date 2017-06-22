@@ -42,6 +42,7 @@ import org.mycore.lookup.api.entity.MappedIdentifiers;
 import org.mycore.lookup.api.entity.Person;
 import org.mycore.lookup.api.entity.Place;
 import org.mycore.lookup.api.entity.Scheme;
+import org.mycore.lookup.api.event.LookupEventListener;
 import org.mycore.lookup.api.service.annotation.Service;
 import org.mycore.lookup.common.event.Event;
 import org.mycore.lookup.common.event.EventManager;
@@ -110,7 +111,7 @@ public abstract class LookupService {
                 })
                 .filter(e -> !e.getValue().isEmpty())
                 .flatMap(e -> e.getValue().stream())
-                //                .peek(o -> EventManager.instance().fireEvent(new Event<V>("index", o)))
+                .peek(o -> EventManager.instance().fireAsyncEvent(new Event<V>(LookupEventListener.EVENT_MAPIDS, o)))
                 .collect(Collectors.toList()));
     }
 
@@ -155,7 +156,8 @@ public abstract class LookupService {
                 .stream()
                 .findFirst().orElse(null);
 
-        Optional.ofNullable(obj).ifPresent(o -> EventManager.instance().fireEvent(new Event<V>("index", o)));
+        Optional.ofNullable(obj)
+            .ifPresent(o -> EventManager.instance().fireAsyncEvent(new Event<V>(LookupEventListener.EVENT_LOOKUP, o)));
 
         return obj;
     }
