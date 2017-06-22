@@ -181,7 +181,7 @@ public class IndexManager {
     private <T> void addOrUpdate(T obj) {
         IndexWriteAction action = null;
 
-        if (!exists(obj)) {
+        if (Optional.ofNullable(buildIdTerm(obj)).isPresent() && !exists(obj)) {
             LOGGER.info("add {}", obj);
             action = IndexWriteAction.addAction(writeExecutor, buildDocument(obj));
         } else {
