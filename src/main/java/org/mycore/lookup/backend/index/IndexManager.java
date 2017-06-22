@@ -371,13 +371,17 @@ public class IndexManager {
             IndexSearcher searcher = new IndexSearcher(reader);
             TopDocs docs = searcher.search(query, limit);
 
-            return Arrays.stream(docs.scoreDocs).map(h -> {
+            List<Document> result = Arrays.stream(docs.scoreDocs).map(h -> {
                 try {
                     return searcher.doc(h.doc);
                 } catch (IOException e) {
                     return null;
                 }
             }).filter(o -> o != null).collect(Collectors.toList());
+
+            reader.close();
+
+            return result;
         } catch (IOException e) {
             return Collections.emptyList();
         }
