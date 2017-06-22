@@ -17,8 +17,9 @@
  * If not, write to the Free Software Foundation Inc.,
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307 USA
  */
-package org.mycore.lookup.backend.index;
+package org.mycore.lookup.api.event;
 
+import org.mycore.lookup.backend.index.IndexManager;
 import org.mycore.lookup.common.event.Event;
 import org.mycore.lookup.common.event.EventManager;
 import org.mycore.lookup.common.event.Listener;
