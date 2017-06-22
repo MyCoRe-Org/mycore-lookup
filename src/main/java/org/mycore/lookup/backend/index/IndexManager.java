@@ -395,7 +395,9 @@ public class IndexManager {
             T obj = (T) objCls.newInstance();
             Map<Method, Field> mm = annotatedMethods(objCls);
 
-            mm.forEach((m, f) -> {
+            mm.entrySet().stream().filter(e -> e.getValue().store()).forEach(e -> {
+                Method m = e.getKey();
+                Field f = e.getValue();
                 String name = fieldPrefix + (f.name().isEmpty() ? ObjectTools.getFieldName(m.getName()) : f.name());
                 Method getter = ObjectTools.getGetter(objCls, m);
                 Method setter = ObjectTools.getSetter(objCls, m);
@@ -412,8 +414,8 @@ public class IndexManager {
                         setter.invoke(obj, value);
                     }
                 } catch (SecurityException | IllegalAccessException
-                    | IllegalArgumentException | InvocationTargetException e) {
-                    throw (RuntimeException) e.getCause();
+                    | IllegalArgumentException | InvocationTargetException ex) {
+                    throw (RuntimeException) ex.getCause();
                 }
             });
 
@@ -447,7 +449,9 @@ public class IndexManager {
             });
 
             return obj;
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | InstantiationException |
+
+            IllegalAccessException e) {
             throw (RuntimeException) e.getCause();
         }
     }
