@@ -92,6 +92,7 @@ public class IndexWriteAction implements Runnable {
             LOGGER.debug("add Document:" + toString());
         }
         executor.getIndexWriter().addDocument(doc);
+        executor.getIndexWriter().commit();
         LOGGER.debug("adding done.");
     }
 
