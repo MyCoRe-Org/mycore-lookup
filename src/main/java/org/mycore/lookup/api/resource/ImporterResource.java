@@ -20,8 +20,9 @@
 package org.mycore.lookup.api.resource;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
-import java.util.stream.Stream;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.mycore.lookup.api.service.LookupService;
 import org.mycore.lookup.api.service.LookupService.Type;
+import org.mycore.lookup.backend.index.IndexManager;
 
 /**
  * @author Ren\u00E9 Adler (eagle)
@@ -42,11 +44,17 @@ public class ImporterResource {
     @Path("personsById")
     public Response importIds(String text) throws IOException {
         StringTokenizer st = new StringTokenizer(text);
-        Stream.generate(() -> st.hasMoreTokens() ? st.nextToken() : null).filter(s -> s != null)
-            .forEach(id -> {
-                LogManager.getLogger().info("Import {}", id);
-                LookupService.lookup(Type.PERSON, id);
-            });
+        List<String> ids = new ArrayList<>();
+        while (st.hasMoreTokens()) {
+            ids.add(st.nextToken());
+        }
+
+        ids.parallelStream()
+            .peek(id -> LogManager.getLogger().info("Import {}", id))
+            .forEach(id -> LookupService.lookup(Type.PERSON, id));
+
+        IndexManager.instance().optimize();
+
         return Response.ok().build();
     }
 }

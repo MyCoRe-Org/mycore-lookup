@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,8 +55,6 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
@@ -69,12 +69,16 @@ import org.mycore.lookup.backend.index.annotation.Id;
 import org.mycore.lookup.backend.index.annotation.IdRef;
 import org.mycore.lookup.common.config.Configuration;
 import org.mycore.lookup.common.config.ConfigurationDir;
+import org.mycore.lookup.common.event.annotation.AutoExecutable;
+import org.mycore.lookup.common.event.annotation.Shutdown;
+import org.mycore.lookup.common.event.annotation.Startup;
 import org.mycore.lookup.util.ObjectTools;
 
 /**
  * @author Ren\u00E9 Adler (eagle)
  *
  */
+@AutoExecutable(name = "Lucene Index Manager", priority = 1000)
 public class IndexManager {
 
     private static final Configuration CONFIG = Configuration.instance();
@@ -95,6 +99,9 @@ public class IndexManager {
 
     private final Directory index;
 
+    protected IndexWriteExecutor writeExecutor;
+
+    @Startup
     public static IndexManager instance() {
         if (INSTANCE == null) {
             INSTANCE = new IndexManager();
@@ -113,6 +120,8 @@ public class IndexManager {
                 Files.createDirectories(path);
             }
             index = FSDirectory.open(path);
+
+            writeExecutor = new IndexWriteExecutor(new LinkedBlockingQueue<Runnable>(), index);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new UncheckedIOException(e);
@@ -160,47 +169,27 @@ public class IndexManager {
         return (FieldAdapter) constructor.newInstance();
     }
 
-    public <T> void set(T obj) throws IOException {
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        IndexWriter w = new IndexWriter(index, config);
-
-        saveOrUpdate(w, obj);
-        buildReferences(obj).forEach(o -> {
-            try {
-                saveOrUpdate(w, o);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-
-        w.commit();
-        w.close();
+    public <T> void set(T obj) {
+        addOrUpdate(obj);
+        buildReferences(obj).forEach(this::addOrUpdate);
     }
 
-    public <T> void set(List<T> objs) throws IOException {
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        IndexWriter w = new IndexWriter(index, config);
-
-        objs.forEach(obj -> {
-            try {
-                saveOrUpdate(w, obj);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-
-        w.commit();
-        w.close();
+    public <T> void set(List<T> objs) {
+        objs.forEach(this::addOrUpdate);
     }
 
-    private <T> void saveOrUpdate(IndexWriter w, T obj) throws IOException {
+    private <T> void addOrUpdate(T obj) {
+        IndexWriteAction action = null;
+
         if (!exists(obj)) {
             LOGGER.info("add {}", obj);
-            w.addDocument(buildDocument(obj));
+            action = IndexWriteAction.addAction(writeExecutor, buildDocument(obj));
         } else {
             LOGGER.info("update {}", obj);
-            w.updateDocument(buildIdTerm(obj), buildDocument(obj));
+            action = IndexWriteAction.updateAction(writeExecutor, buildIdTerm(obj), buildDocument(obj));
         }
+
+        Optional.ofNullable(action).ifPresent(writeExecutor::submit);
     }
 
     private <T> Document buildDocument(T obj) {
@@ -501,5 +490,27 @@ public class IndexManager {
                     return null;
                 }
             }).filter(v -> v != null).findFirst().orElse(null) : null;
+    }
+
+    public void optimize() {
+        writeExecutor.submit(IndexWriteAction.optimizeAction(writeExecutor));
+    }
+
+    @Shutdown
+    public void close() {
+        LOGGER.info("Closing...");
+        writeExecutor.shutdown();
+        long taskCount = writeExecutor.getTaskCount();
+        try {
+            while (!writeExecutor.isTerminated()) {
+                long numProcessed = writeExecutor.getCompletedTaskCount();
+                LOGGER.info("Processed {} of {} modification requests, still working...", numProcessed, taskCount);
+                writeExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            LOGGER.warn("Error while closing", e);
+        }
+        LOGGER.info("Processed all " + writeExecutor.getCompletedTaskCount() + " modification requests.");
+        INSTANCE = null;
     }
 }
