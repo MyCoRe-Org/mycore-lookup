@@ -19,8 +19,13 @@
  */
 package org.mycore.lookup.api.event;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.mycore.lookup.api.entity.IdType;
 import org.mycore.lookup.api.entity.MappedIdentifiers;
 import org.mycore.lookup.api.service.LookupService;
 import org.mycore.lookup.api.service.LookupService.Type;
@@ -39,6 +44,8 @@ public class LookupEventListener implements Listener {
     public static final String EVENT_MAPIDS = "mapIds";
 
     public static final String EVENT_LOOKUP = "lookup";
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /* (non-Javadoc)
      * @see org.mycore.lookup.common.event.Listener#handleEvent(org.mycore.lookup.common.event.Event)
@@ -61,11 +68,16 @@ public class LookupEventListener implements Listener {
 
     @SuppressWarnings("unchecked")
     private <T> void handleMapIds(T obj) {
-        Optional.ofNullable(obj).ifPresent(o -> {
-            if (MappedIdentifiers.class.isAssignableFrom(o.getClass())) {
-                MappedIdentifiers<T> mi = (MappedIdentifiers<T>) o;
-                mi.getMappedIds().parallelStream()
-                    .forEach(idType -> LookupService.lookup(Type.fromValue(obj.getClass()), idType));
+        Optional.ofNullable(obj).map(o -> ((MappedIdentifiers<T>) o)).ifPresent(o -> {
+            List<IdType> rid = o.getMappedIds().parallelStream()
+                .filter(idType -> Optional.ofNullable(LookupService.lookup(Type.fromValue(obj.getClass()), idType))
+                    .isPresent())
+                .distinct()
+                .collect(Collectors.toList());
+
+            if (!rid.isEmpty() && o.getMappedIds().retainAll(rid)) {
+                LOGGER.info("retain mappedIds: {}", rid);
+                EventManager.instance().fireEvent(new Event<>(IndexEventListener.EVENT_INDEX, o));
             }
         });
     }
