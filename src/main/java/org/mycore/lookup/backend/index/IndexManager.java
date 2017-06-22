@@ -97,7 +97,7 @@ public class IndexManager {
 
     private final StopwordAnalyzerBase analyzer;
 
-    private final Directory index;
+    private final Directory indexDir;
 
     protected IndexWriteExecutor writeExecutor;
 
@@ -119,9 +119,9 @@ public class IndexManager {
             if (Files.notExists(path)) {
                 Files.createDirectories(path);
             }
-            index = FSDirectory.open(path);
+            indexDir = FSDirectory.open(path);
 
-            writeExecutor = new IndexWriteExecutor(new LinkedBlockingQueue<Runnable>(), index);
+            writeExecutor = new IndexWriteExecutor(new LinkedBlockingQueue<Runnable>(), indexDir);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new UncheckedIOException(e);
@@ -139,7 +139,7 @@ public class IndexManager {
      * @return the index
      */
     public Directory getIndexDir() {
-        return index;
+        return indexDir;
     }
 
     private Map<Method, Field> annotatedMethods(Class<?> cls) {
@@ -367,7 +367,7 @@ public class IndexManager {
 
     private List<Document> getDocuments(Query query, int limit) {
         try {
-            IndexReader reader = DirectoryReader.open(index);
+            IndexReader reader = DirectoryReader.open(indexDir);
             IndexSearcher searcher = new IndexSearcher(reader);
             TopDocs docs = searcher.search(query, limit);
 
