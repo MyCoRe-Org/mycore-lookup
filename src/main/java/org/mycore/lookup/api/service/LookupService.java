@@ -186,10 +186,11 @@ public abstract class LookupService {
             }
         });
 
-        LOGGER.info("Merged {} in list of {}. ({}ms)", numMerged.get(),
-            Optional.ofNullable(objs.size() == 0 ? objs : (Object) objs.get(0)).orElse(Object.class).getClass()
-                .getSimpleName(),
-            System.currentTimeMillis() - startTime);
+        if (!objs.isEmpty()) {
+            LOGGER.info("Merged {} in list of {}. ({}ms)", numMerged.get(),
+                Optional.ofNullable((Object) objs.get(0)).orElse(Object.class).getClass().getSimpleName(),
+                System.currentTimeMillis() - startTime);
+        }
 
         return merged;
     }
