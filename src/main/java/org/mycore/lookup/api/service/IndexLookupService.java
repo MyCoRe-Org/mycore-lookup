@@ -75,8 +75,8 @@ public class IndexLookupService extends LookupService {
     @Override
     public List<Person> suggestPerson(String term) throws UnsupportedOperationException {
         try {
-            String query = "Person.alternateNames:" + term + " OR Person.description:" + term + " OR Person.givenName:"
-                + term + " OR Person.familyName:" + term;
+            String query = "Person.alternateNames:" + term + " OR Person.description:" + term
+                + " OR Person.displayName:" + term;
             return idx.get(new QueryParser("Person.alternateNames", idx.getAnalyzer()).parse(query));
         } catch (ParseException e) {
             LOGGER.error(e.getMessage(), e);
