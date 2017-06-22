@@ -115,10 +115,10 @@ public class Person extends MappedIdentifiers<Person> {
         this.description = description;
     }
 
-    @Field(analyze = true)
     /**
      * @return the displayName
      */
+    @Field(analyze = true)
     public String getDisplayName() {
         return familyName != null && givenName != null ? familyName + ", " + givenName : null;
     }
