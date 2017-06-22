@@ -21,8 +21,15 @@ package org.mycore.lookup.common.event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.mycore.lookup.Application;
+import org.mycore.lookup.common.event.annotation.EventListener;
+import org.reflections.Reflections;
 
 /**
  * @author Ren\u00E9 Adler (eagle)
@@ -30,9 +37,13 @@ import org.apache.logging.log4j.LogManager;
  */
 public class EventManager {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private static EventManager INSTANCE = null;
 
     private final Map<String, Listener> listeners = new ConcurrentHashMap<>();
+
+    private final ThreadPoolExecutor executor;
 
     public static EventManager instance() {
         if (INSTANCE == null) {
@@ -46,7 +57,21 @@ public class EventManager {
         return INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
     private EventManager() {
+        final Reflections reflections = new Reflections(Application.class.getPackage().getName());
+        reflections.getTypesAnnotatedWith(EventListener.class)
+            .forEach(el -> addListener((Class<? extends Listener>) el));
+
+        executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    }
+
+    public void addListener(final Class<? extends Listener> clazz) {
+        try {
+            addListener(clazz, clazz.newInstance());
+        } catch (InstantiationException | IllegalAccessException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
     public void addListener(final Listener listener) {
@@ -54,6 +79,7 @@ public class EventManager {
     }
 
     public void addListener(final Class<? extends Listener> clazz, final Listener listener) {
+        LOGGER.info("register \"{}\"", clazz.getName());
         listeners.put(clazz.getName(), listener);
     }
 
@@ -62,6 +88,7 @@ public class EventManager {
     }
 
     public void removeListner(final Class<? extends Listener> clazz, final Listener listener) {
+        LOGGER.info("unregister \"{}\"", clazz.getName());
         listeners.remove(listener.getClass().getName());
     }
 
@@ -70,7 +97,6 @@ public class EventManager {
             try {
                 d.handleEvent(event);
             } catch (Exception ex) {
-                LogManager.getLogger(d.getClass()).error(ex.getMessage(), ex);
                 throw new UnsupportedOperationException(ex);
             }
         });
@@ -81,8 +107,32 @@ public class EventManager {
             try {
                 e.getValue().handleEvent(event);
             } catch (Exception ex) {
-                LogManager.getLogger(e.getValue().getClass()).error(ex.getMessage(), ex);
+                throw new UnsupportedOperationException(ex);
             }
+        });
+    }
+
+    public void fireAsyncEvent(final Event<?> event) {
+        listeners.values().forEach(d -> {
+            executor.submit(() -> {
+                try {
+                    d.handleEvent(event);
+                } catch (Exception ex) {
+                    throw new UnsupportedOperationException(ex);
+                }
+            });
+        });
+    }
+
+    public void fireAsyncEvent(final Class<? extends Listener> delegate, final Event<?> event) {
+        listeners.entrySet().stream().filter(e -> e.getKey().equals(delegate.getName())).findFirst().ifPresent(e -> {
+            executor.submit(() -> {
+                try {
+                    e.getValue().handleEvent(event);
+                } catch (Exception ex) {
+                    throw new UnsupportedOperationException(ex);
+                }
+            });
         });
     }
 }
