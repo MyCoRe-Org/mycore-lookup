@@ -69,15 +69,14 @@ public class LookupEventListener implements Listener {
     @SuppressWarnings("unchecked")
     private <T> void handleMapIds(T obj) {
         Optional.ofNullable(obj).map(o -> ((MappedIdentifiers<T>) o)).ifPresent(o -> {
-            List<IdType> rid = o.getMappedIds().parallelStream()
+            List<IdType> l = o.getMappedIds().parallelStream()
                 .filter(idType -> Optional.ofNullable(LookupService.lookup(Type.fromValue(obj.getClass()), idType))
                     .isPresent())
                 .distinct()
                 .collect(Collectors.toList());
 
-            if (!rid.isEmpty() && o.getMappedIds().retainAll(rid)) {
-                LOGGER.info("retain mappedIds: {}", rid);
-                EventManager.instance().fireEvent(new Event<>(IndexEventListener.EVENT_INDEX, o));
+            if (!l.isEmpty()) {
+                LOGGER.debug("mappedIds: {}", l);
             }
         });
     }
