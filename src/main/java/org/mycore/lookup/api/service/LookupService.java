@@ -162,9 +162,14 @@ public abstract class LookupService {
         return obj;
     }
 
-    private static <V> boolean anyMatch(List<V> il1, List<V> il2) {
-        return ((BiFunction<List<V>, List<V>, Boolean>) (l1, l2) -> {
-            return l1.stream().anyMatch(l2::contains);
+    private static boolean anyMatch(List<IdType> il1, List<IdType> il2) {
+        return ((BiFunction<List<IdType>, List<IdType>, Boolean>) (l1, l2) -> {
+            return l1.stream()
+                .anyMatch(i -> l2.contains(i) || l2.stream()
+                    .anyMatch(i2 -> i2.getScheme().equals(i.getScheme())
+                        && (i.getId().startsWith(i2.getId()) || i2.getId().startsWith(i.getId()))
+                        && Math.min(((float) i.getId().length() / (float) i2.getId().length()) * 100,
+                            ((float) i2.getId().length() / (float) i.getId().length()) * 100) >= 75.0));
         }).apply(il1, il2);
     }
 
