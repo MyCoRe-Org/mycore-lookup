@@ -84,7 +84,7 @@ public class TestRDFMapper {
         Corporate corporate = RDFMapper.map(idType.authorityURI(), Corporate.class);
         assertNotNull(corporate);
 
-        assertTrue(corporate.getAlternateNames().contains("FSU Jena"));
+        assertTrue(corporate.getName().contains("Jena"));
     }
 
 }
