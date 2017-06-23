@@ -70,13 +70,15 @@ public abstract class MappedIdentifiers<T> {
      * @param other
      * @return <code>true</code> if probably the same
      */
-    public boolean isProbablySameAs(MappedIdentifiers<T> other) {
-        return this.getMappedIds().stream()
-            .anyMatch(i -> other.getMappedIds().contains(i) || other.getMappedIds().stream()
-                .anyMatch(i2 -> i2.getScheme().equals(i.getScheme())
-                    && (i.getId().startsWith(i2.getId()) || i2.getId().startsWith(i.getId()))
-                    && Math.min(((float) i.getId().length() / (float) i2.getId().length()) * 100,
-                        ((float) i2.getId().length() / (float) i.getId().length()) * 100) >= 75.0));
+    @SuppressWarnings("unchecked")
+    public boolean isProbablySameAs(T other) {
+        return other instanceof MappedIdentifiers && this.getMappedIds().stream()
+            .anyMatch(i -> ((MappedIdentifiers<T>) other).getMappedIds().contains(i)
+                || ((MappedIdentifiers<T>) other).getMappedIds().stream()
+                    .anyMatch(i2 -> i2.getScheme().equals(i.getScheme())
+                        && (i.getId().startsWith(i2.getId()) || i2.getId().startsWith(i.getId()))
+                        && Math.min(((float) i.getId().length() / (float) i2.getId().length()) * 100,
+                            ((float) i2.getId().length() / (float) i.getId().length()) * 100) >= 75.0));
     }
 
     /**
