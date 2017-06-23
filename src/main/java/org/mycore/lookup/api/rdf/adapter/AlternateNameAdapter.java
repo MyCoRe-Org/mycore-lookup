@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 public class AlternateNameAdapter extends RDFMappingAdapter<List<String>, List<String>> {
 
     private static final Pattern PATTERN_DISPLAY_FORM = Pattern
-        .compile("([^,]+),\\s?([^,]+(?=,)|[a-z-A-Z\\s\\d\\.\\-]+(?!,))(?:,\\s|\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
+        .compile(
+            "([^,]+),\\s?([^,]+(?=,)|[^\\(\\)]+|[a-z-A-Z\\w\\d\\.\\-]+(?!,))(?:\\s|,\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
 
     public static String parse(String name) {
         Matcher m = PATTERN_DISPLAY_FORM.matcher(name);

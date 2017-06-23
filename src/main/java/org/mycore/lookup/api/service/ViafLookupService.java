@@ -63,7 +63,8 @@ public class ViafLookupService extends LookupService {
     private static final String REMOTE_PATH = "viaf";
 
     private static final Pattern DISPLAY_FORM_PATTERN = Pattern
-        .compile("([^,]+),\\s?([^,]+(?=,)|[a-z-A-Z\\W\\-]+(?!,))(?:,\\s|\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
+        .compile(
+            "([^,]+),\\s?([^,]+(?=,)|[^\\(\\)]+|[a-z-A-Z\\w\\d\\.\\-]+(?!,))(?:\\s|,\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
 
     private Function<String, WebTarget> buildTarget = (method) -> {
         ClientConfig config = new ClientConfig();

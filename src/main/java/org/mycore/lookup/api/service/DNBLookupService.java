@@ -59,7 +59,8 @@ public class DNBLookupService extends LookupService {
     private static final Pattern PATTERN_BASE_URI = Pattern.compile("http:\\/\\/d-nb\\.info\\/gnd\\/([\\w]+)");
 
     private static final Pattern PATTERN_DISPLAY_FORM = Pattern
-        .compile("([^,]+),\\s?([^,]+(?=,)|[a-z-A-Z\\W\\-]+(?!,))(?:,\\s|\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
+        .compile(
+            "([^,]+),\\s?([^,]+(?=,)|[^\\(\\)]+|[a-z-A-Z\\w\\d\\.\\-]+(?!,))(?:\\s|,\\s?)(?:(\\d+)\\??\\-(\\d+)?\\??)?");
 
     private static final String TYPE_CORPORATE = "CorporateBody";
 
@@ -71,7 +72,7 @@ public class DNBLookupService extends LookupService {
         ClientConfig config = new ClientConfig();
         config.register(JsonProcessingFeature.class);
         config.register(GenericExceptionMapper.class);
-    
+
         return ClientBuilder.newClient(config).target(REMOTE_URL).path("/" + method);
     };
 
