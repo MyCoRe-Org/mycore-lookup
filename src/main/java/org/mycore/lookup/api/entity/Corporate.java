@@ -224,7 +224,7 @@ public class Corporate extends MappedIdentifiers<Corporate> {
                 Arrays.stream(new ArrayList<>(
                     Optional.ofNullable(this.getAlternateNames()).orElse(Collections.emptyList())).stream()
                         .toArray(String[]::new)))
-            .noneMatch(a -> a.equalsIgnoreCase(corporate.getName()));
+            .noneMatch(a -> a != null && corporate.getName() != null && a.equalsIgnoreCase(corporate.getName()));
 
         if (addName) {
             ans.add(corporate.getName());
