@@ -52,7 +52,7 @@ public class TestLookupService {
 
     @Test
     public void testSuggestPerson() {
-        List<Person> persons = LookupService.suggest(Type.PERSON, "tester, jim");
+        List<Person> persons = LookupService.suggest(Type.PERSON, "neumann, kathleen");
 
         assertFalse(persons.isEmpty());
     }
