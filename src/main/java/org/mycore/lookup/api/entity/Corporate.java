@@ -72,6 +72,8 @@ public class Corporate extends MappedIdentifiers<Corporate> {
     @XmlElement
     @RDFMappings({
         @RDFMapping(uri = "http://schema.org/name"),
+        @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#prefLabel"),
+        @RDFMapping(uri = "http://www.loc.gov/mads/rdf/v1#authoritativeLabel"),
         @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForTheCorporateBody")
     })
     public String getName() {
@@ -187,6 +189,8 @@ public class Corporate extends MappedIdentifiers<Corporate> {
     @XmlElement(name = "alternateName")
     @RDFMappings({
         @RDFMapping(uri = "http://schema.org/alternateName"),
+        @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#altLabel"),
+        @RDFMapping(uri = "http://www.loc.gov/mads/rdf/v1#variantLabel"),
         @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#variantNameForTheCorporateBody")
     })
     public List<String> getAlternateNames() {
