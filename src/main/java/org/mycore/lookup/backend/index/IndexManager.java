@@ -519,6 +519,7 @@ public class IndexManager {
     @Shutdown
     public void close() {
         LOGGER.info("Closing...");
+        optimizeScheduler.shutdown();
         writeExecutor.shutdown();
         long taskCount = writeExecutor.getTaskCount();
         try {
