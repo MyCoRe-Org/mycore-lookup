@@ -35,7 +35,9 @@ public class PlacesAdapter extends RDFMappingAdapter<List<String>, List<Place>> 
      */
     @Override
     public List<Place> unmarshal(List<String> v) {
-        return v.stream().map(s -> new PlaceAdapter().unmarshal(s)).filter(s -> s != null).collect(Collectors.toList());
+        List<Place> p = v.stream().map(s -> new PlaceAdapter().unmarshal(s)).filter(s -> s != null)
+            .collect(Collectors.toList());
+        return p.isEmpty() ? null : p;
     }
 
     /* (non-Javadoc)
@@ -43,7 +45,9 @@ public class PlacesAdapter extends RDFMappingAdapter<List<String>, List<Place>> 
      */
     @Override
     public List<String> marshal(List<Place> v) {
-        return v.stream().map(s -> new PlaceAdapter().marshal(s)).filter(s -> s != null).collect(Collectors.toList());
+        return v != null
+            ? v.stream().map(s -> new PlaceAdapter().marshal(s)).filter(s -> s != null).collect(Collectors.toList())
+            : null;
     }
 
 }
