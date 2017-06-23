@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
@@ -162,17 +161,6 @@ public abstract class LookupService {
         return obj;
     }
 
-    private static boolean anyMatch(List<IdType> il1, List<IdType> il2) {
-        return ((BiFunction<List<IdType>, List<IdType>, Boolean>) (l1, l2) -> {
-            return l1.stream()
-                .anyMatch(i -> l2.contains(i) || l2.stream()
-                    .anyMatch(i2 -> i2.getScheme().equals(i.getScheme())
-                        && (i.getId().startsWith(i2.getId()) || i2.getId().startsWith(i.getId()))
-                        && Math.min(((float) i.getId().length() / (float) i2.getId().length()) * 100,
-                            ((float) i2.getId().length() / (float) i.getId().length()) * 100) >= 75.0));
-        }).apply(il1, il2);
-    }
-
     private static <V extends MappedIdentifiers<V>> List<V> merge(List<V> objs) {
         long startTime = System.currentTimeMillis();
 
@@ -181,7 +169,7 @@ public abstract class LookupService {
 
         objs.forEach(o -> {
             Optional<V> o2m = merged.stream()
-                .filter(a -> anyMatch(o.getMappedIds(), a.getMappedIds()))
+                .filter(a -> a.isProbablySameAs(o))
                 .findFirst();
             if (o2m.isPresent()) {
                 o2m.get().merge(o);
