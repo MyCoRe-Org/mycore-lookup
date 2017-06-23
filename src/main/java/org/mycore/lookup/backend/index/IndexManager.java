@@ -35,7 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,6 +91,8 @@ public class IndexManager {
 
     private static final Map<Class<?>, Map<Method, IdRef>> REF_CACHE = new HashMap<>();
 
+    private static final String CONFIG_PREFIX = "Index.";
+
     private static final String OBJECT_CLASS_FIELD = "objectClass";
 
     private static final int DEFAULT_LIMIT = 10;
@@ -101,6 +105,8 @@ public class IndexManager {
 
     protected IndexWriteExecutor writeExecutor;
 
+    private ScheduledExecutorService optimizeScheduler;
+
     @Startup
     public static IndexManager instance() {
         if (INSTANCE == null) {
@@ -110,9 +116,9 @@ public class IndexManager {
     }
 
     private IndexManager() {
-        analyzer = CONFIG.getInstanceOf("Index.Analyzer", new StandardAnalyzer());
+        analyzer = CONFIG.getInstanceOf(CONFIG_PREFIX + "Analyzer", new StandardAnalyzer());
         try {
-            String indexPath = CONFIG.getString("Index.Path",
+            String indexPath = CONFIG.getString(CONFIG_PREFIX + "Path",
                 ConfigurationDir.getConfigurationDirectory().getAbsolutePath() + File.separator + "data"
                     + File.separator + "index");
             Path path = Paths.get(indexPath);
@@ -122,6 +128,12 @@ public class IndexManager {
             indexDir = FSDirectory.open(path);
 
             writeExecutor = new IndexWriteExecutor(new LinkedBlockingQueue<Runnable>(), indexDir);
+
+            int waittime = CONFIG.getInt(CONFIG_PREFIX + "OptimizeInterval", 600);
+            optimizeScheduler = Executors.newSingleThreadScheduledExecutor();
+            optimizeScheduler.scheduleAtFixedRate(
+                () -> writeExecutor.submit(IndexWriteAction.optimizeAction(writeExecutor)),
+                waittime, waittime, TimeUnit.SECONDS);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new UncheckedIOException(e);
