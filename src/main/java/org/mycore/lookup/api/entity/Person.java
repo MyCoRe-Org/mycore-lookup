@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,6 +36,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.logging.log4j.LogManager;
 import org.mycore.lookup.api.entity.adapter.DateTemporalAccessorAdapter;
 import org.mycore.lookup.api.entity.adapter.DateTemporalAccessorFieldAdapter;
 import org.mycore.lookup.api.entity.adapter.GenderFieldAdapter;
@@ -281,6 +283,27 @@ public class Person extends MappedIdentifiers<Person> {
      */
     public void setAlternateNames(List<String> alternateNames) {
         this.alternateNames = alternateNames;
+    }
+
+    /* (non-Javadoc)
+     * @see org.mycore.lookup.api.entity.MappedIdentifiers#isProbablySameAs(java.lang.Object)
+     */
+    @Override
+    public boolean isProbablySameAs(Person other) {
+        if (super.isProbablySameAs(other)) {
+            return true;
+        }
+
+        if (Objects.deepEquals(getFamilyName(), other.getFamilyName())
+            && Objects.deepEquals(getGivenName(), other.getGivenName())) {
+            return (Objects.deepEquals(getGender(), other.getGender())
+                || getGender() != null && other.getGender() == null || getGender() == null && other.getGender() != null)
+                && (Objects.deepEquals(getDateOfBirth(), other.getDateOfBirth())
+                    || getDateOfBirth() != null && other.getDateOfBirth() == null
+                    || getDateOfBirth() == null && other.getDateOfBirth() != null);
+        }
+
+        return false;
     }
 
     /* (non-Javadoc)
