@@ -36,7 +36,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.apache.logging.log4j.LogManager;
 import org.mycore.lookup.api.entity.adapter.DateTemporalAccessorAdapter;
 import org.mycore.lookup.api.entity.adapter.DateTemporalAccessorFieldAdapter;
 import org.mycore.lookup.api.entity.adapter.GenderFieldAdapter;
