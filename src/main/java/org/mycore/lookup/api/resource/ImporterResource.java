@@ -28,10 +28,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.LogManager;
-import org.mycore.lookup.api.service.LookupService;
-import org.mycore.lookup.api.service.LookupService.Type;
-import org.mycore.lookup.backend.index.IndexManager;
+import org.mycore.lookup.api.event.ImportEventListener;
+import org.mycore.lookup.common.event.Event;
+import org.mycore.lookup.common.event.EventManager;
 
 /**
  * @author Ren\u00E9 Adler (eagle)
@@ -49,11 +48,7 @@ public class ImporterResource {
             ids.add(st.nextToken());
         }
 
-        ids.parallelStream()
-            .peek(id -> LogManager.getLogger().info("Import {}", id))
-            .forEach(id -> LookupService.lookup(Type.PERSON, id));
-
-        IndexManager.instance().optimize();
+        EventManager.instance().fireAsyncEvent(new Event<List<String>>(ImportEventListener.EVENT_IMPORT_PERSONS, ids));
 
         return Response.ok().build();
     }
