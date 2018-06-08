@@ -12,7 +12,7 @@
   <scheme id="DNB" authorityURI="http://d-nb.info/gnd/{$id}">
     <alias>gnd</alias>
     <name>Gemeinsame Normdatei</name>
-    <rdf uri="http://d-nb.info/gnd/{$id}/about/lds" type="TTL" />
+    <rdf uri="https://d-nb.info/gnd/{$id}/about/lds" type="RDF/XML" />
   </scheme>
   <scheme id="EGAXA">
     <name>Bibliotheca Alexandrina</name>
