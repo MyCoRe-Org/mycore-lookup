@@ -78,4 +78,7 @@
     <name>Virtual International Authority File</name>
     <rdf uri="http://viaf.org/viaf/{$id}/rdf.xml" type="RDF/XML" />
   </scheme>
+  <scheme id="ORCID" authorityURI="https://orcid.org/{$id}">
+    <name>ORCID</name>
+  </scheme>
 </schemes>
