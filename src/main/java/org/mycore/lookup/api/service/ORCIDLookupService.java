@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,7 +37,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.logging.log4j.LogManager;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.moxy.json.MoxyJsonFeature;
 import org.mycore.lookup.api.entity.Corporate;
@@ -107,7 +107,7 @@ public class ORCIDLookupService extends LookupService {
         WebTarget target = buildTarget.apply("search").queryParam("q", encodeURIComponent(options + term))
             .queryParam("start", 0)
             .queryParam("rows", 100);
-        Response response = target.request(MediaType.APPLICATION_XML).get();
+        Response response = target.request(MediaType.APPLICATION_JSON).get();
 
         if (response.getStatus() == 200) {
             ORCIDSearch res = response.readEntity(ORCIDSearch.class);
@@ -115,6 +115,7 @@ public class ORCIDLookupService extends LookupService {
             return Optional.ofNullable(res.result)
                 .map(result -> result.parallelStream()
                     .map(oi -> person(new IdType(Scheme.get("orcid"), oi.identifier.path)))
+                    .filter(p -> !Objects.isNull(p))
                     .collect(Collectors.toList()))
                 .orElse(null);
         }
@@ -144,11 +145,11 @@ public class ORCIDLookupService extends LookupService {
     @Override
     public Person person(IdType idType) throws UnsupportedOperationException {
         WebTarget target = buildTarget.apply(idType.getId() + "/person");
-        Response response = target.request(MediaType.APPLICATION_XML).get();
+        Response response = target.request(MediaType.APPLICATION_JSON).get();
 
         if (response.getStatus() == 200) {
-            ORCIDPerson op = response.readEntity(ORCIDPerson.class);
-            Person p = op.toPerson();
+            ORCIDPerson res = response.readEntity(ORCIDPerson.class);
+            Person p = res.toPerson();
 
             if (p != null) {
                 if (p.getMappedIds() == null) {
@@ -219,13 +220,24 @@ public class ORCIDLookupService extends LookupService {
         public Person toPerson() {
             Person p = new Person();
 
-            p.setGivenName(this.name.givenNames);
-            p.setFamilyName(this.name.familyName);
+            if (Objects.isNull(this.name)
+                || Objects.isNull(this.name.givenNames) && Objects.isNull(this.name.familyName)) {
+                return null;
+            }
 
-            p.setAlternateNames(this.otherNames.stream().map(on -> on.content).collect(Collectors.toList()));
+            Optional.ofNullable(this.name.givenNames).ifPresent(p::setGivenName);
+            Optional.ofNullable(this.name.familyName).ifPresent(p::setFamilyName);
 
-            p.setMappedIds(this.externalIdentifiers.stream().filter(ei -> Scheme.get(ei.type) != null)
-                .map(ei -> new IdType(Scheme.get(ei.type), ei.value)).collect(Collectors.toList()));
+            Optional.ofNullable(this.otherNames)
+                .ifPresent(
+                    on -> p.setAlternateNames(on.stream().filter(n -> !Objects.isNull(n) && !Objects.isNull(n.content))
+                        .map(n -> n.content).collect(Collectors.toList())));
+
+            Optional.ofNullable(this.externalIdentifiers)
+                .ifPresent(extId -> p.setMappedIds(
+                    extId.stream()
+                        .filter(ei -> ei != null && Scheme.get(ei.type) != null)
+                        .map(ei -> new IdType(Scheme.get(ei.type), ei.value)).collect(Collectors.toList())));
 
             return p;
         }
