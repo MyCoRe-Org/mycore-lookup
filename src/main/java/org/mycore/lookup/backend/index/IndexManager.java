@@ -115,6 +115,27 @@ public class IndexManager {
         return INSTANCE;
     }
 
+    @Shutdown
+    public static void close() {
+        if (INSTANCE != null) {
+            LOGGER.info("Closing...");
+            INSTANCE.optimizeScheduler.shutdown();
+            INSTANCE.writeExecutor.shutdown();
+            long taskCount = INSTANCE.writeExecutor.getTaskCount();
+            try {
+                while (!INSTANCE.writeExecutor.isTerminated()) {
+                    long numProcessed = INSTANCE.writeExecutor.getCompletedTaskCount();
+                    LOGGER.info("Processed {} of {} modification requests, still working...", numProcessed, taskCount);
+                    INSTANCE.writeExecutor.awaitTermination(10, TimeUnit.SECONDS);
+                }
+            } catch (InterruptedException e) {
+                LOGGER.warn("Error while closing", e);
+            }
+            LOGGER.info("Processed all " + INSTANCE.writeExecutor.getCompletedTaskCount() + " modification requests.");
+            INSTANCE = null;
+        }
+    }
+
     private IndexManager() {
         analyzer = CONFIG.getInstanceOf(CONFIG_PREFIX + "Analyzer", new StandardAnalyzer());
         try {
@@ -514,24 +535,5 @@ public class IndexManager {
 
     public void optimize() {
         writeExecutor.submit(IndexWriteAction.optimizeAction(writeExecutor));
-    }
-
-    @Shutdown
-    public void close() {
-        LOGGER.info("Closing...");
-        optimizeScheduler.shutdown();
-        writeExecutor.shutdown();
-        long taskCount = writeExecutor.getTaskCount();
-        try {
-            while (!writeExecutor.isTerminated()) {
-                long numProcessed = writeExecutor.getCompletedTaskCount();
-                LOGGER.info("Processed {} of {} modification requests, still working...", numProcessed, taskCount);
-                writeExecutor.awaitTermination(10, TimeUnit.SECONDS);
-            }
-        } catch (InterruptedException e) {
-            LOGGER.warn("Error while closing", e);
-        }
-        LOGGER.info("Processed all " + writeExecutor.getCompletedTaskCount() + " modification requests.");
-        INSTANCE = null;
     }
 }
