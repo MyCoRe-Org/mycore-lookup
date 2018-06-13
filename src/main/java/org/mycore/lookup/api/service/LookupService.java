@@ -79,7 +79,7 @@ public abstract class LookupService {
 
     @SuppressWarnings("unchecked")
     public static <V extends MappedIdentifiers<V>> List<V> suggest(final Type type, final String term) {
-        return merge(
+        List<V> objs = merge(
             SERVICES.parallelStream()
                 .collect(Collectors.toMap(svc -> svc.getClass(), svc -> {
                     try {
@@ -110,8 +110,11 @@ public abstract class LookupService {
                 })
                 .filter(e -> !e.getValue().isEmpty())
                 .flatMap(e -> e.getValue().stream())
-                .peek(o -> EventManager.instance().fireAsyncEvent(new Event<V>(LookupEventListener.EVENT_MAPIDS, o)))
                 .collect(Collectors.toList()));
+
+        objs.forEach(o -> EventManager.instance().fireAsyncEvent(new Event<V>(LookupEventListener.EVENT_LOOKUP, o)));
+
+        return objs;
     }
 
     @SuppressWarnings("unchecked")
@@ -123,8 +126,12 @@ public abstract class LookupService {
         return lookup(type, new IdType(scheme, id));
     }
 
-    @SuppressWarnings("unchecked")
     public static <V extends MappedIdentifiers<V>> V lookup(final Type type, final IdType idType) {
+        return lookup(type, idType, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <V extends MappedIdentifiers<V>> V lookup(final Type type, final IdType idType, boolean fireEvent) {
         V obj = merge(SERVICES.parallelStream().filter(svc -> svc.supportedSchemes.contains(idType.getScheme()))
             .collect(Collectors.toMap(svc -> svc.getClass(), svc -> {
                 try {
@@ -155,8 +162,11 @@ public abstract class LookupService {
                 .stream()
                 .findFirst().orElse(null);
 
-        Optional.ofNullable(obj)
-            .ifPresent(o -> EventManager.instance().fireAsyncEvent(new Event<V>(LookupEventListener.EVENT_LOOKUP, o)));
+        if (fireEvent) {
+            Optional.ofNullable(obj)
+                .ifPresent(
+                    o -> EventManager.instance().fireAsyncEvent(new Event<V>(LookupEventListener.EVENT_LOOKUP, o)));
+        }
 
         return obj;
     }

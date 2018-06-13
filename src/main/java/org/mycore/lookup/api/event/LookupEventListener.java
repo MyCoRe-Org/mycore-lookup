@@ -70,7 +70,7 @@ public class LookupEventListener implements Listener {
     private <T> void handleMapIds(T obj) {
         Optional.ofNullable(obj).map(o -> ((MappedIdentifiers<T>) o)).ifPresent(o -> {
             List<IdType> l = o.getMappedIds().parallelStream()
-                .filter(idType -> Optional.ofNullable(LookupService.lookup(Type.fromValue(obj.getClass()), idType))
+                .filter(idType -> Optional.ofNullable(LookupService.lookup(Type.fromValue(obj.getClass()), idType, false))
                     .isPresent())
                 .distinct()
                 .collect(Collectors.toList());
