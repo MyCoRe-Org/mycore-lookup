@@ -133,8 +133,10 @@ public class Person extends MappedIdentifiers<Person> {
         @RDFMapping(uri = "http://schema.org/name", adapter = Name2FamilyNameAdapter.class),
         @RDFMapping(uri = "http://schema.org/familyName"),
         @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#prefLabel", adapter = Name2FamilyNameAdapter.class),
-        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson", adapter = Name2FamilyNameAdapter.class),
-        @RDFMapping(nodeUri = "http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson", uri = "http://d-nb.info/standards/elementset/gnd#surname")
+        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson",
+            adapter = Name2FamilyNameAdapter.class),
+        @RDFMapping(nodeUri = "http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson",
+            uri = "http://d-nb.info/standards/elementset/gnd#surname")
     })
     public String getFamilyName() {
         return familyName;
@@ -156,8 +158,10 @@ public class Person extends MappedIdentifiers<Person> {
         @RDFMapping(uri = "http://schema.org/name", adapter = Name2GivenNameAdapter.class),
         @RDFMapping(uri = "http://schema.org/givenName"),
         @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#prefLabel", adapter = Name2GivenNameAdapter.class),
-        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson", adapter = Name2GivenNameAdapter.class),
-        @RDFMapping(nodeUri = "http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson", uri = "http://d-nb.info/standards/elementset/gnd#forename")
+        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#preferredNameForThePerson",
+            adapter = Name2GivenNameAdapter.class),
+        @RDFMapping(nodeUri = "http://d-nb.info/standards/elementset/gnd#preferredNameEntityForThePerson",
+            uri = "http://d-nb.info/standards/elementset/gnd#forename")
     })
     public String getGivenName() {
         return givenName;
@@ -271,7 +275,8 @@ public class Person extends MappedIdentifiers<Person> {
     @RDFMappings({
         @RDFMapping(uri = "http://schema.org/alternateName", adapter = AlternateNameAdapter.class),
         @RDFMapping(uri = "http://www.w3.org/2004/02/skos/core#altLabel", adapter = AlternateNameAdapter.class),
-        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#variantNameForThePerson", adapter = AlternateNameAdapter.class)
+        @RDFMapping(uri = "http://d-nb.info/standards/elementset/gnd#variantNameForThePerson",
+            adapter = AlternateNameAdapter.class)
     })
     public List<String> getAlternateNames() {
         return alternateNames;
@@ -335,7 +340,7 @@ public class Person extends MappedIdentifiers<Person> {
             .noneMatch(a -> person.getFamilyName() != null && person.getGivenName() != null
                 ? a.equalsIgnoreCase(person.getFamilyName() + ", " + person.getGivenName()) : false);
 
-        if (addName) {
+        if (addName && !Objects.isNull(person.getFamilyName()) && !Objects.isNull(person.getGivenName())) {
             ans.add(person.getFamilyName() + ", " + person.getGivenName());
         }
 
